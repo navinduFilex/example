@@ -137,7 +137,6 @@ const ForgetPassword = () => {
                   }}
                   activeOpacity={0.8}
                   onPress={() => {
-                    // Handle password reset logic here
                     alert("Password reset link sent! Check your email.");
                     router.back();
                   }}

@@ -162,7 +162,7 @@ const Login = () => {
                     elevation: 8,
                   }}
                   activeOpacity={0.8}
-                 
+                  onPress={()=>router.replace("/(dashboard)/home")}
                 >
                   <Text
                     style={{
