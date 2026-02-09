@@ -12,7 +12,7 @@ type NavItem = {
 const NAV_ITEMS: NavItem[] = [
   { icon: "home", label: "Home", path: "/home" },
   { icon: "search", label: "Find", path: "/find" },
-  { icon: "paw", label: "Alert", path: "/alerts" },
+  { icon: "paw", label: "Alert", path: "/alert" },
   { icon: "log-out", label: "Logout", path: "/" }, 
 ];
 

@@ -223,7 +223,7 @@ const Home = () => {
                       justifyContent: "center",
                     }}
                     activeOpacity={0.7}
-                    onPress={() => console.log("Edit Profile")}
+                    onPress={() => router.replace("/(dashboard)/profile")}
                   >
                     <Ionicons name="create" size={20} color="#FFD700" />
                   </TouchableOpacity>
@@ -258,7 +258,7 @@ const Home = () => {
                       borderRadius: 12,
                     }}
                     activeOpacity={0.8}
-                    onPress={() => console.log("Add Pet")}
+                    onPress={() =>router.replace("/(dashboard)/addPet")}
                   >
                     <Ionicons name="add" size={20} color="#000000" />
                     <Text
