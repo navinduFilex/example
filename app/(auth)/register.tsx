@@ -22,13 +22,15 @@ const Register = () => {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [whatsAppNum, setWhatsAppNum] = useState("");
+  const [address, setAddress] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleRegister = async () => {
-    if (!username || !email || !password || !confirmPassword) {
+    if (!username || !email || !whatsAppNum || !password || !confirmPassword || !address) {
       Alert.alert("Error", "Please fill all fields");
       return;
     }
@@ -46,7 +48,7 @@ const Register = () => {
     try {
       setLoading(true);
 
-      await register(email, password, username);
+      await register(email, password, username, whatsAppNum,address);
 
       Alert.alert("Success", "Account created successfully!");
       router.replace("/(auth)/login");
@@ -178,6 +180,95 @@ const Register = () => {
                       placeholder="Enter your email"
                       placeholderTextColor="#6b7280"
                       keyboardType="email-address"
+                      autoCapitalize="none"
+                    />
+                  </View>
+                </View>
+
+                <View style={{ marginBottom: 20 }}>
+                  <Text
+                    style={{
+                      color: "#FFD700",
+                      fontSize: 16,
+                      fontWeight: "600",
+                      marginBottom: 8,
+                    }}
+                  >
+                    Whats App Number
+                  </Text>
+                  <View
+                    style={{
+                      backgroundColor: "#1a1a1a",
+                      borderRadius: 12,
+                      borderWidth: 1,
+                      borderColor: "rgba(255, 215, 0, 0.2)",
+                      flexDirection: "row",
+                      alignItems: "center",
+                      paddingHorizontal: 16,
+                    }}
+                  >
+                    <Ionicons
+                      name="call"
+                      size={20}
+                      color="#FFD700"
+                      style={{ marginRight: 12 }}
+                    />
+                    <TextInput
+                      value={whatsAppNum}
+                      onChangeText={setWhatsAppNum}
+                      style={{
+                        flex: 1,
+                        color: "#ffffff",
+                        fontSize: 16,
+                        paddingVertical: 16,
+                      }}
+                      placeholder="Enter your Whats App Contact"
+                      placeholderTextColor="#6b7280"
+                      keyboardType="phone-pad"
+                      autoCapitalize="none"
+                    />
+                  </View>
+                </View>
+
+                <View style={{ marginBottom: 20 }}>
+                  <Text
+                    style={{
+                      color: "#FFD700",
+                      fontSize: 16,
+                      fontWeight: "600",
+                      marginBottom: 8,
+                    }}
+                  >
+                    Address
+                  </Text>
+                  <View
+                    style={{
+                      backgroundColor: "#1a1a1a",
+                      borderRadius: 12,
+                      borderWidth: 1,
+                      borderColor: "rgba(255, 215, 0, 0.2)",
+                      flexDirection: "row",
+                      alignItems: "center",
+                      paddingHorizontal: 16,
+                    }}
+                  >
+                    <Ionicons
+                      name="location-outline"
+                      size={20}
+                      color="#FFD700"
+                      style={{ marginRight: 12 }}
+                    />
+                    <TextInput
+                      value={address}
+                      onChangeText={setAddress}
+                      style={{
+                        flex: 1,
+                        color: "#ffffff",
+                        fontSize: 16,
+                        paddingVertical: 16,
+                      }}
+                      placeholder="Enter your Address"
+                      placeholderTextColor="#6b7280"
                       autoCapitalize="none"
                     />
                   </View>

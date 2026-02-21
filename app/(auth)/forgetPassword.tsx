@@ -12,9 +12,35 @@ import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import Header from "@/component/ui/Header";
 import BottomNav from "@/component/ui/BottomNavigation";
+import { useState } from "react";
+import { sendPasswordResetEmail } from "firebase/auth";
+import { auth } from "@/service/firebase";
 
 const ForgetPassword = () => {
   const router = useRouter();
+  const [email,setEmail] = useState("")
+  const [step,setStep] = useState<"request" | "verify">("request")
+
+  const handleSendVerificationCode = async()=>{
+    if(!email){
+      alert("Please Enter Your Email")
+      return
+    }
+
+    try{
+      await sendPasswordResetEmail(auth,email)
+      alert("Password Reset Link Sent! Check Your Email")
+      router.push("/(auth)/login")
+    }catch(error:any){
+      if(error.code === "auth/user-not-found"){
+        alert("No account found with this email")
+      }else if(error.code === "auth/invalid-email"){
+        alert("Invalid email address")
+      }else{
+        alert("Failed to send reset email")
+      }
+    }
+  }
 
   return (
     <SafeAreaProvider>
@@ -107,6 +133,8 @@ const ForgetPassword = () => {
                       style={{ marginRight: 16 }}
                     />
                     <TextInput
+                      value={email}
+  onChangeText={setEmail}
                       style={{
                         flex: 1,
                         color: "#ffffff",

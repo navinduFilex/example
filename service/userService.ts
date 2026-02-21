@@ -14,13 +14,15 @@ export const getUserData = async (uid: string) => {
   return data as{
     username?: string
     email?: string
+    whatsAppNum?:string
+    address?:string
     profileImage?: string
   };
 };
 
 export const updateUserData = async (
   uid: string,
-  data: { username?: string; email?: string; profileImage?: string },
+  data: { username?: string; email?: string; whatsAppNum?:string; address?:string; profileImage?: string },
 ) => {
   const userRef = doc(db, "users", uid);
   await updateDoc(userRef, data);

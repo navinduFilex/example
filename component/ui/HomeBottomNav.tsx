@@ -2,6 +2,7 @@ import { View, Text, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { usePathname, useRouter } from "expo-router";
+import { useAuth } from "@/hooks/useAuth";
 
 type NavItem = {
   icon: keyof typeof Ionicons.glyphMap;
@@ -13,12 +14,13 @@ const NAV_ITEMS: NavItem[] = [
   { icon: "home", label: "Home", path: "/home" },
   { icon: "search", label: "Find", path: "/find" },
   { icon: "paw", label: "Alert", path: "/alert" },
-  { icon: "log-out", label: "Logout", path: "/" }, 
+  { icon: "log-out", label: "Logout", path: "/" },
 ];
 
 const HomeBottomNav = () => {
   const router = useRouter();
   const pathname = usePathname();
+  const { logout } = useAuth();
 
   return (
     <View
@@ -50,7 +52,18 @@ const HomeBottomNav = () => {
                 key={item.label}
                 style={{ alignItems: "center" }}
                 activeOpacity={0.7}
-                onPress={() => router.replace(item.path as any)}
+                onPress={async () => {
+                  if (item.label === "Logout") {
+                    try {
+                      await logout();
+                      router.replace("/guest");
+                    } catch (error) {
+                      console.log("Logout failed", error);
+                    }
+                  } else {
+                    router.replace(item.path as any);
+                  }
+                }}
               >
                 <Ionicons
                   name={item.icon}

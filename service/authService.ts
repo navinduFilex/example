@@ -6,7 +6,7 @@ export const login = async(email:string,password:string)=>{
     return await signInWithEmailAndPassword(auth,email,password)
 }
 
-export const register = async(email:string,password:string,username:string)=>{
+export const register = async(email:string,password:string,username:string,whatsAppNum:string,address:string)=>{
     try{
         const userCred = await createUserWithEmailAndPassword(auth,email,password)
         await updateProfile(userCred.user,{
@@ -19,6 +19,8 @@ export const register = async(email:string,password:string,username:string)=>{
             username:username.toLowerCase(),
             role:"",
             email,
+            whatsAppNum,
+            address,
             emailVerified:false,
             createdAt:new Date()
         })
