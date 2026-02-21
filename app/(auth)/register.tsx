@@ -12,9 +12,50 @@ import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import Header from "@/component/ui/Header";
 import BottomNav from "@/component/ui/BottomNavigation";
+import React, { useState } from "react";
+import { Alert } from "react-native";
+import { register } from "@/service/authService";
 
 const Register = () => {
   const router = useRouter();
+
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const handleRegister = async () => {
+    if (!username || !email || !password || !confirmPassword) {
+      Alert.alert("Error", "Please fill all fields");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      Alert.alert("Error", "Passwords do not match");
+      return;
+    }
+
+    if (password.length < 6) {
+      Alert.alert("Error", "Password must be at least 6 characters");
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      await register(email, password, username);
+
+      Alert.alert("Success", "Account created successfully!");
+      router.replace("/(auth)/login");
+    } catch (error: any) {
+      Alert.alert("Registration Failed", error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <SafeAreaProvider>
@@ -49,7 +90,8 @@ const Register = () => {
                 <Text
                   style={{ color: "#9ca3af", fontSize: 16, marginBottom: 40 }}
                 >
-                  Create your account to start finding perfect breeding partners for your beloved pet.
+                  Create your account to start finding perfect breeding partners
+                  for your beloved pet.
                 </Text>
 
                 <View style={{ marginBottom: 20 }}>
@@ -74,8 +116,15 @@ const Register = () => {
                       paddingHorizontal: 16,
                     }}
                   >
-                    <Ionicons name="person" size={20} color="#FFD700" style={{ marginRight: 12 }} />
+                    <Ionicons
+                      name="person"
+                      size={20}
+                      color="#FFD700"
+                      style={{ marginRight: 12 }}
+                    />
                     <TextInput
+                      value={username}
+                      onChangeText={setUsername}
                       style={{
                         flex: 1,
                         color: "#ffffff",
@@ -111,8 +160,15 @@ const Register = () => {
                       paddingHorizontal: 16,
                     }}
                   >
-                    <Ionicons name="mail" size={20} color="#FFD700" style={{ marginRight: 12 }} />
+                    <Ionicons
+                      name="mail"
+                      size={20}
+                      color="#FFD700"
+                      style={{ marginRight: 12 }}
+                    />
                     <TextInput
+                      value={email}
+                      onChangeText={setEmail}
                       style={{
                         flex: 1,
                         color: "#ffffff",
@@ -149,8 +205,15 @@ const Register = () => {
                       paddingHorizontal: 16,
                     }}
                   >
-                    <Ionicons name="lock-closed" size={20} color="#FFD700" style={{ marginRight: 12 }} />
+                    <Ionicons
+                      name="lock-closed"
+                      size={20}
+                      color="#FFD700"
+                      style={{ marginRight: 12 }}
+                    />
                     <TextInput
+                      value={password}
+                      onChangeText={setPassword}
                       style={{
                         flex: 1,
                         color: "#ffffff",
@@ -159,10 +222,17 @@ const Register = () => {
                       }}
                       placeholder="Create a password"
                       placeholderTextColor="#6b7280"
-                      secureTextEntry
+                      secureTextEntry={!showPassword}
                     />
-                    <TouchableOpacity>
-                      <Ionicons name="eye" size={20} color="#FFD700" />
+
+                    <TouchableOpacity
+                      onPress={() => setShowPassword(!showPassword)}
+                    >
+                      <Ionicons
+                        name={showPassword ? "eye-off" : "eye"}
+                        size={20}
+                        color="#FFD700"
+                      />
                     </TouchableOpacity>
                   </View>
                 </View>
@@ -189,8 +259,15 @@ const Register = () => {
                       paddingHorizontal: 16,
                     }}
                   >
-                    <Ionicons name="lock-closed" size={20} color="#FFD700" style={{ marginRight: 12 }} />
+                    <Ionicons
+                      name="lock-closed"
+                      size={20}
+                      color="#FFD700"
+                      style={{ marginRight: 12 }}
+                    />
                     <TextInput
+                      value={confirmPassword}
+                      onChangeText={setConfirmPassword}
                       style={{
                         flex: 1,
                         color: "#ffffff",
@@ -199,15 +276,30 @@ const Register = () => {
                       }}
                       placeholder="Confirm your password"
                       placeholderTextColor="#6b7280"
-                      secureTextEntry
+                      secureTextEntry={!showConfirmPassword}
                     />
-                    <TouchableOpacity>
-                      <Ionicons name="eye" size={20} color="#FFD700" />
+
+                    <TouchableOpacity
+                      onPress={() =>
+                        setShowConfirmPassword(!showConfirmPassword)
+                      }
+                    >
+                      <Ionicons
+                        name={showConfirmPassword ? "eye-off" : "eye"}
+                        size={20}
+                        color="#FFD700"
+                      />
                     </TouchableOpacity>
                   </View>
                 </View>
 
-                <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 32 }}>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    marginBottom: 32,
+                  }}
+                >
                   <TouchableOpacity
                     style={{
                       width: 24,
@@ -224,16 +316,24 @@ const Register = () => {
                     <Ionicons name="checkmark" size={18} color="#FFD700" />
                   </TouchableOpacity>
                   <View style={{ flex: 1 }}>
-                    <Text style={{ color: "#9ca3af", fontSize: 14, lineHeight: 20 }}>
+                    <Text
+                      style={{ color: "#9ca3af", fontSize: 14, lineHeight: 20 }}
+                    >
                       I agree to TailMate's{" "}
-                      <Text style={{ color: "#FFD700", fontWeight: "500" }}>Terms of Service</Text>{" "}
+                      <Text style={{ color: "#FFD700", fontWeight: "500" }}>
+                        Terms of Service
+                      </Text>{" "}
                       and{" "}
-                      <Text style={{ color: "#FFD700", fontWeight: "500" }}>Privacy Policy</Text>
+                      <Text style={{ color: "#FFD700", fontWeight: "500" }}>
+                        Privacy Policy
+                      </Text>
                     </Text>
                   </View>
                 </View>
 
                 <TouchableOpacity
+                  onPress={handleRegister}
+                  disabled={loading}
                   style={{
                     backgroundColor: "#FFD700",
                     paddingVertical: 18,
@@ -255,7 +355,7 @@ const Register = () => {
                       fontSize: 18,
                     }}
                   >
-                    Create Account
+                    {loading ? "Creating..." : "Create Account"}
                   </Text>
                 </TouchableOpacity>
 
@@ -266,7 +366,13 @@ const Register = () => {
                     marginBottom: 24,
                   }}
                 >
-                  <View style={{ flex: 1, height: 1, backgroundColor: "rgba(255, 215, 0, 0.2)" }} />
+                  <View
+                    style={{
+                      flex: 1,
+                      height: 1,
+                      backgroundColor: "rgba(255, 215, 0, 0.2)",
+                    }}
+                  />
                   <Text
                     style={{
                       color: "#9ca3af",
@@ -276,7 +382,13 @@ const Register = () => {
                   >
                     Or sign up with
                   </Text>
-                  <View style={{ flex: 1, height: 1, backgroundColor: "rgba(255, 215, 0, 0.2)" }} />
+                  <View
+                    style={{
+                      flex: 1,
+                      height: 1,
+                      backgroundColor: "rgba(255, 215, 0, 0.2)",
+                    }}
+                  />
                 </View>
 
                 <TouchableOpacity
@@ -355,32 +467,38 @@ const Register = () => {
                     {
                       icon: "shield-checkmark",
                       title: "Secure Account",
-                      description: "All your data is encrypted and protected with industry-standard security",
+                      description:
+                        "All your data is encrypted and protected with industry-standard security",
                     },
                     {
                       icon: "paw",
                       title: "Pet Information",
-                      description: "After registration, you'll be guided to add your pet's details",
+                      description:
+                        "After registration, you'll be guided to add your pet's details",
                     },
                     {
                       icon: "search",
                       title: "Better Matching",
-                      description: "Complete profiles get more accurate breeding partner suggestions",
+                      description:
+                        "Complete profiles get more accurate breeding partner suggestions",
                     },
                     {
                       icon: "people",
                       title: "Join Community",
-                      description: "Connect with responsible pet owners and experienced breeders",
+                      description:
+                        "Connect with responsible pet owners and experienced breeders",
                     },
                     {
                       icon: "notifications",
                       title: "Stay Updated",
-                      description: "Get notified about compatible matches and breeding opportunities",
+                      description:
+                        "Get notified about compatible matches and breeding opportunities",
                     },
                     {
                       icon: "help-circle",
                       title: "Need Assistance?",
-                      description: "Our support team is available 24/7 at support@tailmate.com",
+                      description:
+                        "Our support team is available 24/7 at support@tailmate.com",
                     },
                   ].map((guideline, index) => (
                     <View
@@ -455,15 +573,17 @@ const Register = () => {
                   }}
                 >
                   <View style={{ alignItems: "center", flex: 1 }}>
-                    <View style={{
-                      width: 60,
-                      height: 60,
-                      backgroundColor: "rgba(255, 215, 0, 0.1)",
-                      borderRadius: 30,
-                      alignItems: "center",
-                      justifyContent: "center",
-                      marginBottom: 8,
-                    }}>
+                    <View
+                      style={{
+                        width: 60,
+                        height: 60,
+                        backgroundColor: "rgba(255, 215, 0, 0.1)",
+                        borderRadius: 30,
+                        alignItems: "center",
+                        justifyContent: "center",
+                        marginBottom: 8,
+                      }}
+                    >
                       <Ionicons name="heart" size={28} color="#FFD700" />
                     </View>
                     <Text
@@ -486,16 +606,22 @@ const Register = () => {
                     }}
                   />
                   <View style={{ alignItems: "center", flex: 1 }}>
-                    <View style={{
-                      width: 60,
-                      height: 60,
-                      backgroundColor: "rgba(255, 215, 0, 0.1)",
-                      borderRadius: 30,
-                      alignItems: "center",
-                      justifyContent: "center",
-                      marginBottom: 8,
-                    }}>
-                      <Ionicons name="shield-checkmark" size={28} color="#FFD700" />
+                    <View
+                      style={{
+                        width: 60,
+                        height: 60,
+                        backgroundColor: "rgba(255, 215, 0, 0.1)",
+                        borderRadius: 30,
+                        alignItems: "center",
+                        justifyContent: "center",
+                        marginBottom: 8,
+                      }}
+                    >
+                      <Ionicons
+                        name="shield-checkmark"
+                        size={28}
+                        color="#FFD700"
+                      />
                     </View>
                     <Text
                       style={{
@@ -508,11 +634,11 @@ const Register = () => {
                     >
                       Verified Profiles
                     </Text>
-                  </View> 
+                  </View>
                 </View>
               </View>
             </ScrollView>
-           <BottomNav/>
+            <BottomNav />
           </SafeAreaView>
         </LinearGradient>
       </View>

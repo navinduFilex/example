@@ -8,12 +8,15 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
-import { useRouter } from "expo-router";
+import { Redirect, useRouter } from "expo-router";
 import Header from "@/component/ui/Header";
 import BottomNav from "@/component/ui/BottomNavigation";
+import { useEffect } from "react";
+import { useAuth } from "@/hooks/useAuth";
 
 const Index = () => {
   const router = useRouter();
+  const {user,loading} = useAuth()
 
   type ActionKey = "login" | "signup" | "browse";
 
@@ -352,6 +355,11 @@ const Index = () => {
       </View>
     </SafeAreaProvider>
   );
+  if(!user){
+    return <Redirect href={"/(auth)/login"}></Redirect>
+  }
+
+  return <Redirect href={"/(dashboard)/home"}></Redirect>
 };
 
 export default Index;

@@ -12,9 +12,36 @@ import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import Header from "@/component/ui/Header";
 import BottomNav from "@/component/ui/BottomNavigation";
+import { useState } from "react";
+import { Alert } from "react-native";
+import { login } from "@/service/authService";
+import { useLoader } from "@/hooks/useLoader";
 
 const Login = () => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
+
+  const { showLoader, hideLoader, isLoading } = useLoader();
+
+  const handleLogin = async () => {
+    if (!email || !password || isLoading) {
+      Alert.alert("Error", "Please enter email and password");
+      return;
+    }
+
+    try {
+      showLoader();
+      await login(email, password);
+      router.replace("/(dashboard)/home");
+    } catch (error: any) {
+      Alert.alert("Login Failed");
+    } finally {
+      hideLoader()
+    }
+  };
 
   return (
     <SafeAreaProvider>
@@ -49,7 +76,8 @@ const Login = () => {
                 <Text
                   style={{ color: "#9ca3af", fontSize: 16, marginBottom: 40 }}
                 >
-                  Sign in to your TailMate account to continue finding perfect matches for your pet.
+                  Sign in to your TailMate account to continue finding perfect
+                  matches for your pet.
                 </Text>
 
                 <View style={{ marginBottom: 24 }}>
@@ -74,8 +102,15 @@ const Login = () => {
                       paddingHorizontal: 16,
                     }}
                   >
-                    <Ionicons name="mail" size={20} color="#FFD700" style={{ marginRight: 12 }} />
+                    <Ionicons
+                      name="mail"
+                      size={20}
+                      color="#FFD700"
+                      style={{ marginRight: 12 }}
+                    />
                     <TextInput
+                      value={email}
+                      onChangeText={setEmail}
                       style={{
                         flex: 1,
                         color: "#ffffff",
@@ -112,8 +147,15 @@ const Login = () => {
                       paddingHorizontal: 16,
                     }}
                   >
-                    <Ionicons name="lock-closed" size={20} color="#FFD700" style={{ marginRight: 12 }} />
+                    <Ionicons
+                      name="lock-closed"
+                      size={20}
+                      color="#FFD700"
+                      style={{ marginRight: 12 }}
+                    />
                     <TextInput
+                      value={password}
+                      onChangeText={setPassword}
                       style={{
                         flex: 1,
                         color: "#ffffff",
@@ -122,10 +164,17 @@ const Login = () => {
                       }}
                       placeholder="Enter your password"
                       placeholderTextColor="#6b7280"
-                      secureTextEntry
+                      secureTextEntry={!showPassword}
                     />
-                    <TouchableOpacity>
-                      <Ionicons name="eye" size={20} color="#FFD700" />
+
+                    <TouchableOpacity
+                      onPress={() => setShowPassword(!showPassword)}
+                    >
+                      <Ionicons
+                        name={showPassword ? "eye-off" : "eye"}
+                        size={20}
+                        color="#FFD700"
+                      />
                     </TouchableOpacity>
                   </View>
                 </View>
@@ -133,8 +182,8 @@ const Login = () => {
                 <TouchableOpacity
                   style={{ alignSelf: "flex-end", marginBottom: 32 }}
                   activeOpacity={0.7}
-                  onPress={()=>{
-                    router.push("/(auth)/forgetPassword")
+                  onPress={() => {
+                    router.push("/(auth)/forgetPassword");
                   }}
                 >
                   <Text
@@ -162,7 +211,8 @@ const Login = () => {
                     elevation: 8,
                   }}
                   activeOpacity={0.8}
-                  onPress={()=>router.replace("/(dashboard)/home")}
+                  onPress={handleLogin}
+                  disabled={loading}
                 >
                   <Text
                     style={{
@@ -182,7 +232,13 @@ const Login = () => {
                     marginBottom: 24,
                   }}
                 >
-                  <View style={{ flex: 1, height: 1, backgroundColor: "rgba(255, 215, 0, 0.2)" }} />
+                  <View
+                    style={{
+                      flex: 1,
+                      height: 1,
+                      backgroundColor: "rgba(255, 215, 0, 0.2)",
+                    }}
+                  />
                   <Text
                     style={{
                       color: "#9ca3af",
@@ -192,7 +248,13 @@ const Login = () => {
                   >
                     Or continue with
                   </Text>
-                  <View style={{ flex: 1, height: 1, backgroundColor: "rgba(255, 215, 0, 0.2)" }} />
+                  <View
+                    style={{
+                      flex: 1,
+                      height: 1,
+                      backgroundColor: "rgba(255, 215, 0, 0.2)",
+                    }}
+                  />
                 </View>
 
                 <TouchableOpacity
@@ -255,7 +317,7 @@ const Login = () => {
                 </View>
               </View>
             </ScrollView>
-            <BottomNav/>
+            <BottomNav />
           </SafeAreaView>
         </LinearGradient>
       </View>
