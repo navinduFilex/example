@@ -32,17 +32,29 @@ const AddPet = () => {
   const [petBreed, setPetBreed] = useState("");
   const [petAge, setPetAge] = useState("");
   const [vaccinated, setVaccinated] = useState(false);
+  const [showImageOptions, setShowImageOptions] = useState(false);
 
   const pickImage = async () => {
+    setShowImageOptions(false);
+
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    if (status !== "granted") {
+      Alert.alert(
+        "Permission Denied",
+        "You need to enable gallery access in your device settings.",
+      );
+      return;
+    }
+
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes:['images'],
       allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
+      aspect: [1, 1],
+      quality: 0.8,
     });
 
     if (!result.canceled) {
-      setPetImage(result.assets[0].uri);
+      setPetImage(result.assets[0].uri); 
     }
   };
 
@@ -77,10 +89,10 @@ const AddPet = () => {
         age: petAge,
         gender: isMale ? "Male" : "Female",
         vaccinated: vaccinated,
-        imageUri: petImage!,
+        petImage: petImage,
       });
       Alert.alert("Success", "Pet added successfully!");
-      router.back();
+      router.replace("/(dashboard)/home");
     } catch (error) {
       console.error(error);
       Alert.alert("Error", "Failed to add pet. Please try again.");
@@ -103,7 +115,7 @@ const AddPet = () => {
 
               <View style={{ paddingHorizontal: 24, paddingBottom: 24 }}>
                 <TouchableOpacity
-                  onPress={() => router.back()}
+                  onPress={() => router.replace("/(dashboard)/home")}
                   style={{
                     flexDirection: "row",
                     alignItems: "center",
@@ -542,7 +554,7 @@ const AddPet = () => {
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                  onPress={() => router.back()}
+                  onPress={() => router.replace("/(dashboard)/home")}
                   style={{
                     backgroundColor: "transparent",
                     paddingVertical: 18,

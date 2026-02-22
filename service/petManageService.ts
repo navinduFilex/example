@@ -1,5 +1,5 @@
 import { db } from "./firebase";
-import { doc, collection, addDoc, setDoc } from "firebase/firestore";
+import {  collection, addDoc, getDocs } from "firebase/firestore";
 
 export const addPet = async (
   userId: string,
@@ -10,14 +10,14 @@ export const addPet = async (
     age?: string;
     gender: "Male" | "Female";
     vaccinated: boolean;
-    imageUri: string,
+    petImage: string,
   },
   
 ) => {
   try {
-    const imageUrl = await uploadPetImage(petData.imageUri, userId);
+    const imageUrl = await uploadPetImage(petData.petImage, userId);
 
-    const petsCollection = collection(db, "users", userId, "pets");
+    const petsCollection = collection(db,"users", userId,"pets");
 
     const petDocRef = await addDoc(petsCollection, {
       ...petData,
@@ -65,3 +65,31 @@ export const uploadPetImage = async (uri: string, uid: string) => {
     throw new Error("Failed to upload pet image");
   }
 };
+
+export const getUserPet = async(userId:string)=>{
+  try{
+    const petCollection = collection(db,"users",userId,"pets")
+    const snapShot = await getDocs(petCollection)
+
+    const pets: {
+      id: string;
+      name: string;
+      breed?: string;
+      age?: string;
+      gender: "Male" | "Female";
+      imageUrl?: string;
+    }[] = []
+
+    snapShot.forEach((doc)=>{
+      pets.push({
+        id:doc.id,
+        ...doc.data(),
+      }as any)
+    })
+
+    return pets
+  }catch(error){
+    console.error("Failed to fetch pets:", error);
+    return [];
+  }
+}

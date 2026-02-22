@@ -11,43 +11,35 @@ import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import Header from "@/component/ui/Header";
-import { useState } from "react"; 
+import { useEffect, useState } from "react";
 import PetCard from "@/component/ui/PetCard";
 import TopMatchCard from "@/component/ui/TopMatchCard";
 import FindingAlertCard from "@/component/ui/FindingAlertCard";
 import HomeBottomNav from "@/component/ui/HomeBottomNav";
+import { useAuth } from "@/hooks/useAuth";
+import { getUserPet } from "@/service/petManageService";
 
 const Home = () => {
   const router = useRouter();
 
-  const [hasActiveAlert, setHasActiveAlert] = useState(true); 
+  const { user } = useAuth();
+  const [userPets, setUserPets] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchPets = async () => {
+      if (!user) return;
+      const pets = await getUserPet(user.uid);
+      setUserPets(pets);
+    };
+    fetchPets();
+  }, [user]);
 
   const userProfile = {
     name: "David Wilson",
-    profileImage: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=2070", 
+    profileImage:
+      "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=2070",
     email: "david.wilson@email.com",
   };
-
-  const userPets = [
-    {
-      id: 1,
-      name: "Charlie",
-      breed: "Labrador Retriever",
-      age: "2 years",
-      gender: "Male",
-      image:
-        "https://images.unsplash.com/photo-1543466835-00a7907e9de1?q=80&w=1974",
-    },
-    {
-      id: 2,
-      name: "Luna",
-      breed: "Persian Cat",
-      age: "3 years",
-      gender: "Female",
-      image:
-        "https://images.unsplash.com/photo-1513360371669-4adf3dd7dff8?q=80&w=2070",
-    },
-  ];
 
   const pets = [
     {
@@ -152,7 +144,7 @@ const Home = () => {
                 >
                   Welcome back, David! 🐾
                 </Text>
-                
+
                 <TouchableOpacity
                   style={{
                     flexDirection: "row",
@@ -195,7 +187,9 @@ const Home = () => {
                     >
                       {userProfile.name}
                     </Text>
-                    <View style={{ flexDirection: "row", alignItems: "center" }}>
+                    <View
+                      style={{ flexDirection: "row", alignItems: "center" }}
+                    >
                       <Ionicons
                         name="mail"
                         size={14}
@@ -258,7 +252,7 @@ const Home = () => {
                       borderRadius: 12,
                     }}
                     activeOpacity={0.8}
-                    onPress={() =>router.replace("/(dashboard)/addPet")}
+                    onPress={() => router.replace("/(dashboard)/addPet")}
                   >
                     <Ionicons name="add" size={20} color="#000000" />
                     <Text
@@ -294,7 +288,7 @@ const Home = () => {
                       padding: 24,
                     }}
                     activeOpacity={0.8}
-                    onPress={() => console.log("Add New Pet")}
+                    onPress={() => router.replace("/(dashboard)/addPet")}
                   >
                     <View
                       style={{
@@ -324,7 +318,14 @@ const Home = () => {
                   {userPets.map((pet) => (
                     <PetCard
                       key={pet.id}
-                      pet={pet}
+                      pet={{
+                        id: pet.id,
+                        name: pet.name,
+                        breed: pet.breed,
+                        age: pet.age,
+                        gender: pet.gender,
+                        image: pet.imageUrl,
+                      }}
                       onPressManage={() => console.log("Manage", pet.name)}
                     />
                   ))}
@@ -371,205 +372,10 @@ const Home = () => {
                 </ScrollView>
               </View>
 
-              <View style={{ paddingHorizontal: 24, paddingBottom: 32 }}>
-                <Text
-                  style={{
-                    color: "#ffffff",
-                    fontSize: 24,
-                    fontWeight: "bold",
-                    marginBottom: 24,
-                  }}
-                >
-                  🔔 Current Finding Alert
-                </Text>
-
-                {hasActiveAlert ? (
-                  alerts.length > 0 ? (
-                    alerts.map((alert) => (
-                      <FindingAlertCard
-                        key={alert.id}
-                        alert={alert}
-                        onEdit={() => console.log("Edit", alert.petName)}
-                        onDelete={() => console.log("Delete", alert.petName)}
-                        onViewComments={() =>
-                          console.log("View Comments", alert.petName)
-                        }
-                      />
-                    ))
-                  ) : (
-                    <View
-                      style={{
-                        backgroundColor: "#1a1a1a",
-                        borderRadius: 20,
-                        padding: 32,
-                        borderWidth: 1,
-                        borderColor: "rgba(255, 215, 0, 0.2)",
-                        alignItems: "center",
-                      }}
-                    >
-                      <View
-                        style={{
-                          width: 80,
-                          height: 80,
-                          backgroundColor: "rgba(255, 215, 0, 0.1)",
-                          borderRadius: 40,
-                          alignItems: "center",
-                          justifyContent: "center",
-                          marginBottom: 24,
-                        }}
-                      >
-                        <Ionicons name="paw" size={40} color="#FFD700" />
-                      </View>
-                      <Text
-                        style={{
-                          color: "#ffffff",
-                          fontSize: 22,
-                          fontWeight: "bold",
-                          marginBottom: 12,
-                          textAlign: "center",
-                        }}
-                      >
-                        No Active Alerts
-                      </Text>
-                      <Text
-                        style={{
-                          color: "#9ca3af",
-                          fontSize: 16,
-                          textAlign: "center",
-                          marginBottom: 8,
-                          lineHeight: 24,
-                        }}
-                      >
-                        You don't have any active finding alerts for your pets.
-                      </Text>
-                      <Text
-                        style={{
-                          color: "#FFD700",
-                          fontSize: 18,
-                          fontWeight: "600",
-                          marginBottom: 24,
-                          textAlign: "center",
-                        }}
-                      >
-                        Wanna find perfect matches?
-                      </Text>
-                      <TouchableOpacity
-                        style={{
-                          backgroundColor: "#FFD700",
-                          paddingHorizontal: 32,
-                          paddingVertical: 16,
-                          borderRadius: 12,
-                          alignItems: "center",
-                          shadowColor: "#FFD700",
-                          shadowOffset: { width: 0, height: 4 },
-                          shadowOpacity: 0.3,
-                          shadowRadius: 8,
-                          elevation: 8,
-                        }}
-                        activeOpacity={0.8}
-                        onPress={() => console.log("Create Alert")}
-                      >
-                        <Text
-                          style={{
-                            color: "#000000",
-                            fontWeight: "bold",
-                            fontSize: 18,
-                          }}
-                        >
-                          Create Finding Alert
-                        </Text>
-                      </TouchableOpacity>
-                    </View>
-                  )
-                ) : (
-                  <View
-                    style={{
-                      backgroundColor: "#1a1a1a",
-                      borderRadius: 20,
-                      padding: 32,
-                      borderWidth: 1,
-                      borderColor: "rgba(255, 215, 0, 0.2)",
-                      alignItems: "center",
-                    }}
-                  >
-                    <View
-                      style={{
-                        width: 80,
-                        height: 80,
-                        backgroundColor: "rgba(255, 215, 0, 0.1)",
-                        borderRadius: 40,
-                        alignItems: "center",
-                        justifyContent: "center",
-                        marginBottom: 24,
-                      }}
-                    >
-                      <Ionicons name="paw" size={40} color="#FFD700" />
-                    </View>
-                    <Text
-                      style={{
-                        color: "#ffffff",
-                        fontSize: 22,
-                        fontWeight: "bold",
-                        marginBottom: 12,
-                        textAlign: "center",
-                      }}
-                    >
-                      No Active Alerts
-                    </Text>
-                    <Text
-                      style={{
-                        color: "#9ca3af",
-                        fontSize: 16,
-                        textAlign: "center",
-                        marginBottom: 8,
-                        lineHeight: 24,
-                      }}
-                    >
-                      You don't have any active finding alerts for your pets.
-                    </Text>
-                    <Text
-                      style={{
-                        color: "#FFD700",
-                        fontSize: 18,
-                        fontWeight: "600",
-                        marginBottom: 24,
-                        textAlign: "center",
-                      }}
-                    >
-                      Wanna find perfect matches?
-                    </Text>
-                    <TouchableOpacity
-                      style={{
-                        backgroundColor: "#FFD700",
-                        paddingHorizontal: 32,
-                        paddingVertical: 16,
-                        borderRadius: 12,
-                        alignItems: "center",
-                        shadowColor: "#FFD700",
-                        shadowOffset: { width: 0, height: 4 },
-                        shadowOpacity: 0.3,
-                        shadowRadius: 8,
-                        elevation: 8,
-                      }}
-                      activeOpacity={0.8}
-                      onPress={() => setHasActiveAlert(true)}
-                    >
-                      <Text
-                        style={{
-                          color: "#000000",
-                          fontWeight: "bold",
-                          fontSize: 18,
-                        }}
-                      >
-                        Create Finding Alert
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
-                )}
-              </View>
+            
             </ScrollView>
 
-            <HomeBottomNav/>
+            <HomeBottomNav />
           </SafeAreaView>
         </LinearGradient>
       </View>
