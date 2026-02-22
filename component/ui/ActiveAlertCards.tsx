@@ -3,23 +3,20 @@ import { View, Text, TouchableOpacity, Image } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
 export interface AlertItem {
-  id: number;
+  id: string;
   petName: string;
   breed: string;
-  lastSeen: string;
-  time: string;
-  status: "Active" | "Resolved";
-  reward: string;
-  petImage: string;
+  status: "Active" | "Found";
+  image: string;
   age: string;
   gender: "Male" | "Female";
-  additionalDetails: string;
+  vaccinated:boolean
 }
 
 interface Props {
   alert: AlertItem;
-  onCancel: (id: number) => void;
-  onFound: (id: number) => void;
+  onCancel: (id: string) => void;
+  onFound: (id: string) => void;
 }
 
 const ActiveAlertCard = ({ alert, onCancel, onFound }: Props) => {
@@ -36,7 +33,7 @@ const ActiveAlertCard = ({ alert, onCancel, onFound }: Props) => {
     >
       <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 12 }}>
         <Image
-          source={{ uri: alert.petImage }}
+          source={{ uri: alert.image }}
           style={{ width: 80, height: 80, borderRadius: 40, marginRight: 12, borderWidth: 2, borderColor: "#FFD700" }}
         />
         <View style={{ flex: 1 }}>

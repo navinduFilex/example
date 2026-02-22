@@ -19,6 +19,7 @@ import ActiveAlertCard from "@/component/ui/ActiveAlertCards";
 import { useAuth } from "@/hooks/useAuth";
 import { getUserPet } from "@/service/petManageService";
 import { useUser } from "@/context/UserContext";
+import { getActiveAlerts, publishMatchingAlert } from "@/service/matchingAlertService";
 
 interface Pet {
   id: string;
@@ -32,19 +33,6 @@ interface Pet {
   lastSeen: string;
 }
 
-interface AlertItem {
-  id: number;
-  petName: string;
-  breed: string;
-  lastSeen: string;
-  time: string;
-  status: "Active" | "Resolved";
-  reward: string;
-  petImage: string;
-  age: string;
-  gender: "Male" | "Female";
-  additionalDetails: string;
-}
 
 const AlertPage = () => {
   const router = useRouter();
@@ -53,115 +41,60 @@ const AlertPage = () => {
   const [selectedPet, setSelectedPet] = useState<Pet | null>(null);
   const [showPetDropdown, setShowPetDropdown] = useState(false);
   const { userData, loading } = useUser();
-
+  const [activeAlerts, setActiveAlerts] = useState<any[]>([])
+ 
   useEffect(() => {
+    if (!user){
+      router.replace("/(auth)/login")
+      return
+    }
+
+    const fetchActiveAlerts = async() =>{
+      const alerts = await getActiveAlerts(user.uid)
+      setActiveAlerts(alerts)
+    }
+    
     const fetchPets = async () => {
-      if (!user) return;
       const pets = await getUserPet(user.uid);
-      console.log(pets);
       setUserPets(pets);
     };
     fetchPets();
+    fetchActiveAlerts()
   }, [user]);
 
   
 
-  const handlePublishAlert = () => {
-    
+  const handlePublishMathcing = async() => {
+    if(!selectedPet){
+      Alert.alert("Please Select A Pet First")
+      return
+    }
+
+    try{
+      await publishMatchingAlert(
+        user!.uid,
+        selectedPet.id,
+        userData!.whatsAppNum,
+        userData!.address
+      )
+
+      Alert.alert("TailMate Alert Published..!")
+      setSelectedPet(null);
+    }catch(error){
+      Alert.alert("Error,Failed To Publish Your TailMate Alert..!")
+    }
   };
 
-  const handleCancelAlert = (alertId: number) => {
-    Alert.alert(
-      "Cancel Alert",
-      "Are you sure you want to cancel this finding alert?",
-      [
-        { text: "No", style: "cancel" },
-        {
-          text: "Yes, Cancel",
-          style: "destructive",
-          onPress: () => {
-            setActiveAlerts(
-              activeAlerts.filter((alert) => alert.id !== alertId),
-            );
-            Alert.alert("Success", "Alert has been cancelled.");
-          },
-        },
-      ],
-    );
+  const handleCancelAlert = (alertId: string) => {
+
   };
 
-  const handleFoundPet = (alertId: number) => {
-    Alert.alert(
-      "Mark as Found",
-      "Has your pet been found? This will mark the alert as resolved.",
-      [
-        { text: "Not Yet", style: "cancel" },
-        {
-          text: "Yes, Found!",
-          style: "default",
-          onPress: () => {
-            setActiveAlerts(
-              activeAlerts.map((alert) =>
-                alert.id === alertId ? { ...alert, status: "Resolved" } : alert,
-              ),
-            );
-            Alert.alert(
-              "🎉 Wonderful!",
-              "We're so happy your pet has been found!",
-            );
-          },
-        },
-      ],
-    );
+  const handleFoundPet = (alertId: string) => {
+
   };
 
-  const [activeAlerts, setActiveAlerts] = useState<AlertItem[]>([
-    {
-      id: 1,
-      petName: "Charlie",
-      breed: "Labrador Retriever",
-      lastSeen: "Central Park, NYC",
-      time: "2 hours ago",
-      status: "Active",
-      reward: "$200",
-      petImage:
-        "https://images.unsplash.com/photo-1543466835-00a7907e9de1?q=80&w=1974",
-      age: "2 years",
-      gender: "Male",
-      additionalDetails:
-        "Charlie is wearing a blue collar with contact information. He's friendly and loves treats.",
-    },
-    {
-      id: 2,
-      petName: "Luna",
-      breed: "Persian Cat",
-      lastSeen: "Home - 123 Park Ave",
-      time: "1 day ago",
-      status: "Active",
-      reward: "$150",
-      petImage:
-        "https://images.unsplash.com/photo-1513360371669-4adf3dd7dff8?q=80&w=2070",
-      age: "3 years",
-      gender: "Female",
-      additionalDetails:
-        "Luna has distinctive blue eyes and is a bit shy. She's wearing a pink collar.",
-    },
-    {
-      id: 3,
-      petName: "Max",
-      breed: "Golden Retriever",
-      lastSeen: "Dog Park, 5th Avenue",
-      time: "3 days ago",
-      status: "Active",
-      reward: "",
-      petImage:
-        "https://images.unsplash.com/photo-1552053831-71594a27632d?q=80&w=2062",
-      age: "1 year",
-      gender: "Male",
-      additionalDetails:
-        "Very energetic and loves playing fetch. Last seen chasing squirrels.",
-    },
-  ]);
+  
+
   return (
     <SafeAreaProvider>
       <View style={{ flex: 1, backgroundColor: "#000000" }}>
@@ -391,7 +324,7 @@ const AlertPage = () => {
                   </View>
 
                   <TouchableOpacity
-                    onPress={handlePublishAlert}
+                    onPress={handlePublishMathcing}
                     style={{
                       backgroundColor: "#FFD700",
                       paddingVertical: 18,
