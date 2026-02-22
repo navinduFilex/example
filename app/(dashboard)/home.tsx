@@ -5,6 +5,7 @@ import {
   ScrollView,
   StatusBar,
   Image,
+  Alert,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
@@ -18,28 +19,49 @@ import FindingAlertCard from "@/component/ui/FindingAlertCard";
 import HomeBottomNav from "@/component/ui/HomeBottomNav";
 import { useAuth } from "@/hooks/useAuth";
 import { getUserPet } from "@/service/petManageService";
+import { getUserData } from "@/service/userService";
 
 const Home = () => {
-  const router = useRouter();
+  interface IUserData {
+    username: string;
+    email: string;
+    whatsAppNum: string;
+    address: string;
+    profileImage: string | null;
+  }
 
+  const router = useRouter();
   const { user } = useAuth();
   const [userPets, setUserPets] = useState<any[]>([]);
+  const [userData, setUserData] = useState<IUserData>({
+    username: "",
+    email: "",
+    whatsAppNum: "",
+    address: "",
+    profileImage: null,
+  });
 
   useEffect(() => {
+    const userDetails = async () => {
+      if (!user) return;
+      const userData = await getUserData(user.uid);
+      setUserData({
+        username: userData?.username ?? "",
+        email: userData?.email ?? "",
+        whatsAppNum: userData?.whatsAppNum ?? "",
+        address: userData?.address ?? "",
+        profileImage: userData?.profileImage ?? null,
+      });
+    };
+
     const fetchPets = async () => {
       if (!user) return;
       const pets = await getUserPet(user.uid);
       setUserPets(pets);
     };
+    userDetails();
     fetchPets();
   }, [user]);
-
-  const userProfile = {
-    name: "David Wilson",
-    profileImage:
-      "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=2070",
-    email: "david.wilson@email.com",
-  };
 
   const pets = [
     {
@@ -170,7 +192,11 @@ const Home = () => {
                     }}
                   >
                     <Image
-                      source={{ uri: userProfile.profileImage }}
+                      source={{
+                        uri:
+                          userData.profileImage ??
+                          "https://via.placeholder.com/150",
+                      }}
                       style={{ width: "100%", height: "100%" }}
                       resizeMode="cover"
                     />
@@ -185,7 +211,7 @@ const Home = () => {
                         marginBottom: 4,
                       }}
                     >
-                      {userProfile.name}
+                      {userData.username}
                     </Text>
                     <View
                       style={{ flexDirection: "row", alignItems: "center" }}
@@ -202,7 +228,7 @@ const Home = () => {
                           fontSize: 14,
                         }}
                       >
-                        {userProfile.email}
+                        {userData.email}
                       </Text>
                     </View>
                   </View>
@@ -371,8 +397,6 @@ const Home = () => {
                   ))}
                 </ScrollView>
               </View>
-
-            
             </ScrollView>
 
             <HomeBottomNav />
