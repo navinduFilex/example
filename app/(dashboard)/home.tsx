@@ -20,46 +20,23 @@ import HomeBottomNav from "@/component/ui/HomeBottomNav";
 import { useAuth } from "@/hooks/useAuth";
 import { getUserPet } from "@/service/petManageService";
 import { getUserData } from "@/service/userService";
+import { useUser } from "@/context/UserContext";
 
 const Home = () => {
-  interface IUserData {
-    username: string;
-    email: string;
-    whatsAppNum: string;
-    address: string;
-    profileImage: string | null;
-  }
-
+ 
+  const { userData, loading } = useUser();
   const router = useRouter();
   const { user } = useAuth();
   const [userPets, setUserPets] = useState<any[]>([]);
-  const [userData, setUserData] = useState<IUserData>({
-    username: "",
-    email: "",
-    whatsAppNum: "",
-    address: "",
-    profileImage: null,
-  });
+
 
   useEffect(() => {
-    const userDetails = async () => {
-      if (!user) return;
-      const userData = await getUserData(user.uid);
-      setUserData({
-        username: userData?.username ?? "",
-        email: userData?.email ?? "",
-        whatsAppNum: userData?.whatsAppNum ?? "",
-        address: userData?.address ?? "",
-        profileImage: userData?.profileImage ?? null,
-      });
-    };
 
     const fetchPets = async () => {
       if (!user) return;
       const pets = await getUserPet(user.uid);
       setUserPets(pets);
     };
-    userDetails();
     fetchPets();
   }, [user]);
 
@@ -194,7 +171,7 @@ const Home = () => {
                     <Image
                       source={{
                         uri:
-                          userData.profileImage ??
+                          userData?.profileImage ??
                           "https://via.placeholder.com/150",
                       }}
                       style={{ width: "100%", height: "100%" }}
@@ -211,7 +188,7 @@ const Home = () => {
                         marginBottom: 4,
                       }}
                     >
-                      {userData.username}
+                      {userData?.username}
                     </Text>
                     <View
                       style={{ flexDirection: "row", alignItems: "center" }}
@@ -228,7 +205,7 @@ const Home = () => {
                           fontSize: 14,
                         }}
                       >
-                        {userData.email}
+                        {userData?.email}
                       </Text>
                     </View>
                   </View>

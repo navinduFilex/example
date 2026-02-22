@@ -1,47 +1,63 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { createContext, useContext, useEffect, useState } from "react";
 import { getUserData } from "@/service/userService";
+import { useAuth } from "@/hooks/useAuth";
 
-interface UserContextType {
+interface IUserData {
+  username: string;
+  email: string;
+  whatsAppNum: string;
+  address: string;
   profileImage: string | null;
-  username: string | null;
-  reloadUser: () => void;
 }
 
-const UserContext = createContext<UserContextType>({
-  profileImage: null,
-  username: null,
-  reloadUser: () => {},
-});
+interface UserContextType {
+  userData: IUserData | null;
+  loading: boolean;
+  refreshUser: () => Promise<void>;
+}
 
-export const UserProvider = ({ children }: { children: ReactNode }) => {
-  const [profileImage, setProfileImage] = useState<string | null>(null);
-  const [username, setUsername] = useState<string | null>(null);
-  const auth = getAuth();
+const UserContext = createContext<UserContextType | undefined>(undefined);
 
+export const UserProvider = ({ children }: any) => {
+  const { user } = useAuth();
+  const [userData, setUserData] = useState<IUserData | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const loadUser = async (uid: string) => {
-    try {
-      const data = await getUserData(uid);
-      setProfileImage(data.profileImage || null);
-      setUsername(data.username || null);
-    } catch (error) {
-      console.error("Failed to load user:", error);
-    }
+  const fetchUser = async () => {
+    if (!user) return;
+
+    const data = await getUserData(user.uid);
+
+    setUserData({
+      username: data?.username ?? "",
+      email: data?.email ?? "",
+      whatsAppNum: data?.whatsAppNum ?? "",
+      address: data?.address ?? "",
+      profileImage: data?.profileImage ?? null,
+    });
+
+    setLoading(false);
   };
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) loadUser(user.uid);
-    });
-    return () => unsubscribe();
-  }, []);
+    fetchUser();
+  }, [user]);
 
   return (
-    <UserContext.Provider value={{ profileImage, username, reloadUser: () => auth.currentUser && loadUser(auth.currentUser.uid) }}>
+    <UserContext.Provider
+      value={{
+        userData,
+        loading,
+        refreshUser: fetchUser,
+      }}
+    >
       {children}
     </UserContext.Provider>
   );
 };
 
-export const useUser = () => useContext(UserContext);
+export const useUser = () => {
+  const context = useContext(UserContext);
+  if (!context) throw new Error("useUser must be used inside UserProvider");
+  return context;
+};
