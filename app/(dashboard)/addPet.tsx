@@ -7,6 +7,7 @@ import {
   Image,
   TextInput,
   Switch,
+  Alert,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
@@ -15,24 +16,26 @@ import { useRouter } from "expo-router";
 import Header from "@/component/ui/Header";
 import { useState } from "react";
 import HomeBottomNav from "@/component/ui/HomeBottomNav";
-import * as ImagePicker from 'expo-image-picker';
+import * as ImagePicker from "expo-image-picker";
+import { useAuth } from "@/hooks/useAuth";
+import { addPet, uploadPetImage } from "@/service/petManageService";
+import { Picker } from "@react-native-picker/picker";
 
 const AddPet = () => {
   const router = useRouter();
 
+  const { user } = useAuth();
   const [petName, setPetName] = useState("");
-  const [address, setAddress] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
   const [isMale, setIsMale] = useState(true);
   const [petImage, setPetImage] = useState<string | null>(null);
-  const [petType, setPetType] = useState("Dog");
+  const [petType, setPetType] = useState("");
   const [petBreed, setPetBreed] = useState("");
   const [petAge, setPetAge] = useState("");
   const [vaccinated, setVaccinated] = useState(false);
 
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes:['images'],
       allowsEditing: true,
       aspect: [4, 3],
       quality: 1,
@@ -55,9 +58,33 @@ const AddPet = () => {
     }
   };
 
-  const handleAddPet = () => {
-    console.log("working");
-    
+  const handleAddPet = async () => {
+    if (!petName.trim() || !petType || !petBreed || !petAge || !petImage) {
+      Alert.alert("Please fill all require fields");
+      return;
+    }
+
+    if (!user) {
+      Alert.alert("User Not Authenticated");
+      return;
+    }
+
+    try {
+      await addPet(user.uid, {
+        name: petName,
+        type: petType,
+        breed: petBreed,
+        age: petAge,
+        gender: isMale ? "Male" : "Female",
+        vaccinated: vaccinated,
+        imageUri: petImage!,
+      });
+      Alert.alert("Success", "Pet added successfully!");
+      router.back();
+    } catch (error) {
+      console.error(error);
+      Alert.alert("Error", "Failed to add pet. Please try again.");
+    }
   };
 
   return (
@@ -137,7 +164,9 @@ const AddPet = () => {
                       backgroundColor: "#1a1a1a",
                       borderRadius: 20,
                       borderWidth: 1,
-                      borderColor: petImage ? "#FFD700" : "rgba(255, 215, 0, 0.2)",
+                      borderColor: petImage
+                        ? "#FFD700"
+                        : "rgba(255, 215, 0, 0.2)",
                       borderStyle: petImage ? "solid" : "dashed",
                       padding: 24,
                       alignItems: "center",
@@ -244,7 +273,9 @@ const AddPet = () => {
                   />
                 </View>
 
-                <View style={{ flexDirection: "row", marginBottom: 24, gap: 16 }}>
+                <View
+                  style={{ flexDirection: "row", marginBottom: 24, gap: 16 }}
+                >
                   <View style={{ flex: 1 }}>
                     <Text
                       style={{
@@ -260,18 +291,51 @@ const AddPet = () => {
                       style={{
                         backgroundColor: "#1a1a1a",
                         borderRadius: 12,
-                        padding: 16,
-                        flexDirection: "row",
-                        justifyContent: "space-between",
-                        alignItems: "center",
                         borderWidth: 1,
                         borderColor: "rgba(255, 215, 0, 0.2)",
                       }}
                     >
-                      <Text style={{ color: "#ffffff", fontSize: 16 }}>
-                        {petType}
-                      </Text>
-                      <Ionicons name="chevron-down" size={20} color="#FFD700" />
+                      <Picker
+                        selectedValue={petType}
+                        onValueChange={(itemValue) => setPetType(itemValue)}
+                        dropdownIconColor="#FFD700"
+                        style={{
+                          color: petType ? "#FFD700" : "#9ca3af",
+                          backgroundColor: "#1a1a1a",
+                        }}
+                        mode="dropdown"
+                      >
+                        <Picker.Item
+                          label="Select Type"
+                          value=""
+                          color="#9ca3af"
+                          style={{ backgroundColor: "#1a1a1a" }}
+                        />
+                        <Picker.Item
+                          label="Dog"
+                          value="Dog"
+                          color="#FFD700"
+                          style={{ backgroundColor: "#1a1a1a" }}
+                        />
+                        <Picker.Item
+                          label="Cat"
+                          value="Cat"
+                          color="#FFD700"
+                          style={{ backgroundColor: "#1a1a1a" }}
+                        />
+                        <Picker.Item
+                          label="Rabbit"
+                          value="Rabbit"
+                          color="#FFD700"
+                          style={{ backgroundColor: "#1a1a1a" }}
+                        />
+                        <Picker.Item
+                          label="Hamster"
+                          value="Hamster"
+                          color="#FFD700"
+                          style={{ backgroundColor: "#1a1a1a" }}
+                        />
+                      </Picker>
                     </View>
                   </View>
 
@@ -357,9 +421,7 @@ const AddPet = () => {
                       onPress={() => setIsMale(true)}
                       style={{
                         flex: 1,
-                        backgroundColor: isMale
-                          ? "#FFD700"
-                          : "transparent",
+                        backgroundColor: isMale ? "#FFD700" : "transparent",
                         paddingVertical: 12,
                         borderRadius: 8,
                         alignItems: "center",
@@ -388,9 +450,7 @@ const AddPet = () => {
                       onPress={() => setIsMale(false)}
                       style={{
                         flex: 1,
-                        backgroundColor: !isMale
-                          ? "#FFD700"
-                          : "transparent",
+                        backgroundColor: !isMale ? "#FFD700" : "transparent",
                         paddingVertical: 12,
                         borderRadius: 8,
                         alignItems: "center",
@@ -415,67 +475,6 @@ const AddPet = () => {
                       </Text>
                     </TouchableOpacity>
                   </View>
-                </View>
-
-                <View style={{ marginBottom: 24 }}>
-                  <Text
-                    style={{
-                      color: "#ffffff",
-                      fontSize: 18,
-                      fontWeight: "600",
-                      marginBottom: 12,
-                    }}
-                  >
-                    Address *
-                  </Text>
-                  <TextInput
-                    value={address}
-                    onChangeText={setAddress}
-                    placeholder="Your address for pet meetings"
-                    placeholderTextColor="#666666"
-                    multiline
-                    numberOfLines={3}
-                    style={{
-                      backgroundColor: "#1a1a1a",
-                      borderRadius: 12,
-                      padding: 16,
-                      color: "#ffffff",
-                      fontSize: 16,
-                      borderWidth: 1,
-                      borderColor: "rgba(255, 215, 0, 0.2)",
-                      minHeight: 80,
-                      textAlignVertical: "top",
-                    }}
-                  />
-                </View>
-
-                <View style={{ marginBottom: 24 }}>
-                  <Text
-                    style={{
-                      color: "#ffffff",
-                      fontSize: 18,
-                      fontWeight: "600",
-                      marginBottom: 12,
-                    }}
-                  >
-                    Phone Number *
-                  </Text>
-                  <TextInput
-                    value={phoneNumber}
-                    onChangeText={setPhoneNumber}
-                    placeholder="Your contact number"
-                    placeholderTextColor="#666666"
-                    keyboardType="phone-pad"
-                    style={{
-                      backgroundColor: "#1a1a1a",
-                      borderRadius: 12,
-                      padding: 16,
-                      color: "#ffffff",
-                      fontSize: 16,
-                      borderWidth: 1,
-                      borderColor: "rgba(255, 215, 0, 0.2)",
-                    }}
-                  />
                 </View>
 
                 <View

@@ -42,7 +42,7 @@ export const uploadProfileImage = async (uri: string, uid: string) => {
 
     formData.append("upload_preset", "profile_upload");
 
-    const cloudinaryUrl = `https://api.cloudinary.com/v1_1/dgluvcp9o/image/upload`;
+    const cloudinaryUrl = `https://api.cloudinary.com/v1_1/dsc9mxsby/image/upload`;
 
     const response = await fetch(cloudinaryUrl, {
       method: "POST",
