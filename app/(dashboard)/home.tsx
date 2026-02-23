@@ -95,28 +95,7 @@ const Home = () => {
     },
   ];
 
-  const alerts = [
-    {
-      id: 1,
-      petName: "Charlie",
-      breed: "Labrador Retriever",
-      age: "2 years",
-      gender: "Male",
-      alertCreated: "3 days ago",
-      address: "123 Park Avenue, New York, NY 10022",
-      status: "Active",
-    },
-    {
-      id: 2,
-      petName: "Luna",
-      breed: "Persian Cat",
-      age: "3 years",
-      gender: "Female",
-      alertCreated: "5 days ago",
-      address: "456 Elm Street, Los Angeles, CA 90001",
-      status: "Resolved",
-    },
-  ];
+  
 
   return (
     <SafeAreaProvider>
@@ -141,7 +120,7 @@ const Home = () => {
                     marginBottom: 16,
                   }}
                 >
-                  Welcome back, David! 🐾
+                  Welcome back, {userData?.username}! 🐾
                 </Text>
 
                 <TouchableOpacity
@@ -155,7 +134,7 @@ const Home = () => {
                     borderColor: "rgba(255, 215, 0, 0.2)",
                   }}
                   activeOpacity={0.8}
-                  onPress={() => console.log("Navigate to Profile")}
+                  onPress={() => router.replace("/(dashboard)/profile")}
                 >
                   <View
                     style={{
