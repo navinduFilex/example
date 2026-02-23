@@ -19,7 +19,11 @@ import ActiveAlertCard from "@/component/ui/ActiveAlertCards";
 import { useAuth } from "@/hooks/useAuth";
 import { getUserPet } from "@/service/petManageService";
 import { useUser } from "@/context/UserContext";
-import { getActiveAlerts, publishMatchingAlert } from "@/service/matchingAlertService";
+import {
+  deleteAlert,
+  getActiveAlerts,
+  publishMatchingAlert,
+} from "@/service/matchingAlertService";
 
 interface Pet {
   id: string;
@@ -27,12 +31,11 @@ interface Pet {
   breed: string;
   age: string;
   gender: "Male" | "Female";
-  imageUrl?: string; 
+  imageUrl?: string;
   petImage?: string;
   vaccinated: boolean;
   lastSeen: string;
 }
-
 
 const AlertPage = () => {
   const router = useRouter();
@@ -41,59 +44,76 @@ const AlertPage = () => {
   const [selectedPet, setSelectedPet] = useState<Pet | null>(null);
   const [showPetDropdown, setShowPetDropdown] = useState(false);
   const { userData, loading } = useUser();
-  const [activeAlerts, setActiveAlerts] = useState<any[]>([])
- 
+  const [activeAlerts, setActiveAlerts] = useState<any[]>([]);
+
   useEffect(() => {
-    if (!user){
-      router.replace("/(auth)/login")
-      return
+    if (!user) {
+      router.replace("/(auth)/login");
+      return;
     }
 
-    const fetchActiveAlerts = async() =>{
-      const alerts = await getActiveAlerts(user.uid)
-      setActiveAlerts(alerts)
-    }
-    
+    const fetchActiveAlerts = async () => {
+      const alerts = await getActiveAlerts(user.uid);
+      setActiveAlerts(alerts);
+    };
+
     const fetchPets = async () => {
       const pets = await getUserPet(user.uid);
       setUserPets(pets);
     };
     fetchPets();
-    fetchActiveAlerts()
+    fetchActiveAlerts();
   }, [user]);
 
-  
-
-  const handlePublishMathcing = async() => {
-    if(!selectedPet){
-      Alert.alert("Please Select A Pet First")
-      return
+  const handlePublishMathcing = async () => {
+    if (!selectedPet) {
+      Alert.alert("Please Select A Pet First");
+      return;
     }
 
-    try{
+    try {
       await publishMatchingAlert(
         user!.uid,
         selectedPet.id,
         userData!.whatsAppNum,
-        userData!.address
-      )
+        userData!.address,
+      );
 
-      Alert.alert("TailMate Alert Published..!")
+      Alert.alert("TailMate Alert Published..!");
       setSelectedPet(null);
-    }catch(error){
-      Alert.alert("Error,Failed To Publish Your TailMate Alert..!")
+    } catch (error:any) {
+      Alert.alert("Error", error.message);
+      setSelectedPet(null);
     }
   };
 
-  const handleCancelAlert = (alertId: string) => {
+  const handleCancelAlert = async (alertId: string) => {
+    Alert.alert(
+      "Cancel Alert",
+      "Are You Sure You Want To Cancel This Alert .. ?",
+      [
+        { text: "No", style: "cancel" },
+        {
+          text: "Yes",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await deleteAlert(alertId);
 
+              setActiveAlerts((prev) =>
+                prev.filter((alert) => alert.id !== alertId),
+              );
+              Alert.alert("Alert Cancelled Successfully");
+            } catch (error) {
+              Alert.alert("Failed To Cancel Alert");
+            }
+          },
+        },
+      ],
+    );
   };
 
-  const handleFoundPet = (alertId: string) => {
-
-  };
-
-  
+  const handleFoundPet = (alertId: string) => {};
 
   return (
     <SafeAreaProvider>
@@ -111,7 +131,7 @@ const AlertPage = () => {
 
               <View style={{ paddingHorizontal: 24, paddingBottom: 24 }}>
                 <TouchableOpacity
-                  onPress={() => router.back()}
+                  onPress={() => router.replace("/(dashboard)/home")}
                   style={{
                     flexDirection: "row",
                     alignItems: "center",
@@ -194,7 +214,10 @@ const AlertPage = () => {
                         {selectedPet ? (
                           <>
                             <Image
-                              source={{ uri: selectedPet.imageUrl || selectedPet.imageUrl }}
+                              source={{
+                                uri:
+                                  selectedPet.imageUrl || selectedPet.imageUrl,
+                              }}
                               style={{
                                 width: 40,
                                 height: 40,
