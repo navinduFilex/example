@@ -10,6 +10,22 @@ import {
   deleteDoc,
 } from "firebase/firestore";
 
+interface MatchingAlert {
+  id: string;
+  userId: string;
+  petId: string;
+  petName: string;
+  address: string;
+  whatsAppNum: string;
+  gender: string;
+  age: string;
+  image: string;
+  type: string;
+  vaccinated: boolean;
+  breed: string;
+  status: string;
+}
+
 export const publishMatchingAlert = async (
   userId: string,
   petId: string,
@@ -31,7 +47,7 @@ export const publishMatchingAlert = async (
     if (!querySnapshot.empty) {
       throw new Error("This pet already has an active alert.");
     }
-    
+
     const petDoc = doc(db, "users", userId, "pets", petId);
     const petSnap = await getDoc(petDoc);
 
@@ -89,5 +105,34 @@ export const deleteAlert = async (alertId: string) => {
     return true;
   } catch (error) {
     throw new Error("Failed To Cancel Matching Alert..!");
+  }
+};
+
+export const getAllAlerts = async (
+  userId: string
+): Promise<MatchingAlert[]> => {
+  try {
+    const alertRef = collection(db, "alerts");
+
+    const q = query(
+      alertRef,
+      where("status", "==", "Active")
+    );
+
+    const querySnapshot = await getDocs(q);
+
+    let alerts: MatchingAlert[] = querySnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...(doc.data() as Omit<MatchingAlert, "id">),
+    }));
+
+    alerts = alerts.filter((alert) => alert.userId !== userId);
+
+    alerts = alerts.sort(() => 0.5 - Math.random());
+
+    return alerts.slice(0, 10);
+
+  } catch (error) {
+    return [];
   }
 };

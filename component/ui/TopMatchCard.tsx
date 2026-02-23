@@ -4,16 +4,16 @@ import React from "react";
 
 type TopMatchCardProps = {
   pet: {
-    id: number;
-    name: string;
+    id: string;
+    petName: string;
     breed: string;
     age: string;
     gender: string;
-    owner: string;
-    location: string;
-    contact: string;
-    compatibility: string;
+    userId: string;
+    address: string;
+    whatsAppNum: string;
     image?: string;
+    vaccinated?:boolean
   };
   onPressView?: () => void;
 };
@@ -49,7 +49,7 @@ const TopMatchCard = ({ pet, onPressView }: TopMatchCardProps) => {
         >
           <Ionicons name="heart" size={16} color="#FFD700" />
           <Text style={{ color: "#FFD700", fontWeight: "bold", marginLeft: 4, fontSize: 14 }}>
-            {pet.compatibility}
+            {pet.vaccinated}
           </Text>
         </View>
       </View>
@@ -57,7 +57,7 @@ const TopMatchCard = ({ pet, onPressView }: TopMatchCardProps) => {
       <View style={{ padding: 20 }}>
         <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 }}>
           <View>
-            <Text style={{ color: "#ffffff", fontSize: 20, fontWeight: "bold", marginBottom: 4 }}>{pet.name}</Text>
+            <Text style={{ color: "#ffffff", fontSize: 20, fontWeight: "bold", marginBottom: 4 }}>{pet.petName}</Text>
             <Text style={{ color: "#FFD700", fontSize: 14, fontWeight: "500" }}>{pet.breed}</Text>
           </View>
           <View style={{ backgroundColor: "rgba(255, 215, 0, 0.1)", borderRadius: 12, paddingHorizontal: 10, paddingVertical: 6 }}>
@@ -68,15 +68,15 @@ const TopMatchCard = ({ pet, onPressView }: TopMatchCardProps) => {
         <View style={{ backgroundColor: "rgba(255, 215, 0, 0.05)", borderRadius: 12, padding: 16, marginBottom: 16 }}>
           <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 12 }}>
             <Ionicons name="person" size={18} color="#FFD700" style={{ marginRight: 8 }} />
-            <Text style={{ color: "#ffffff", fontSize: 14 }}>{pet.owner}</Text>
+            <Text style={{ color: "#ffffff", fontSize: 14 }}>{pet.vaccinated ? "Vaccinated" : "Not Vaccinated"}</Text>
           </View>
           <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 12 }}>
             <Ionicons name="location" size={18} color="#FFD700" style={{ marginRight: 8 }} />
-            <Text style={{ color: "#9ca3af", fontSize: 14 }}>{pet.location}</Text>
+            <Text style={{ color: "#9ca3af", fontSize: 14 }}>{pet.address}</Text>
           </View>
           <View style={{ flexDirection: "row", alignItems: "center" }}>
             <Ionicons name="call" size={18} color="#FFD700" style={{ marginRight: 8 }} />
-            <Text style={{ color: "#9ca3af", fontSize: 14 }}>{pet.contact}</Text>
+            <Text style={{ color: "#9ca3af", fontSize: 14 }}>{pet.whatsAppNum}</Text>
           </View>
         </View>
 
@@ -85,7 +85,7 @@ const TopMatchCard = ({ pet, onPressView }: TopMatchCardProps) => {
           activeOpacity={0.8}
           onPress={onPressView}
         >
-          <Text style={{ color: "#000000", fontWeight: "bold", fontSize: 16 }}>View Details</Text>
+          <Text style={{ color: "#000000", fontWeight: "bold", fontSize: 16 }}>Contact</Text>
         </TouchableOpacity>
       </View>
     </TouchableOpacity>

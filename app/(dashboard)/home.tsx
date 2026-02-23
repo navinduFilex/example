@@ -5,7 +5,6 @@ import {
   ScrollView,
   StatusBar,
   Image,
-  Alert,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
@@ -15,88 +14,55 @@ import Header from "@/component/ui/Header";
 import { useEffect, useState } from "react";
 import PetCard from "@/component/ui/PetCard";
 import TopMatchCard from "@/component/ui/TopMatchCard";
-import FindingAlertCard from "@/component/ui/FindingAlertCard";
 import HomeBottomNav from "@/component/ui/HomeBottomNav";
 import { useAuth } from "@/hooks/useAuth";
 import { getUserPet } from "@/service/petManageService";
-import { getUserData } from "@/service/userService";
 import { useUser } from "@/context/UserContext";
+import { getAllAlerts } from "@/service/matchingAlertService";
+import { Linking, Alert } from "react-native";
+
 
 const Home = () => {
- 
   const { userData, loading } = useUser();
   const router = useRouter();
   const { user } = useAuth();
   const [userPets, setUserPets] = useState<any[]>([]);
-
+  const [matchAlerts, setMatchAlerts] = useState<any[]>([]);
 
   useEffect(() => {
+    if (!user) {
+      router.replace("/(auth)/login");
+      return;
+    }
+
+    const fetchMatchAlerts = async () => {
+      const alerts = await getAllAlerts(user.uid)
+      console.log(alerts)
+      setMatchAlerts(alerts)
+    };
 
     const fetchPets = async () => {
-      if (!user) return;
       const pets = await getUserPet(user.uid);
       setUserPets(pets);
     };
     fetchPets();
+    fetchMatchAlerts()
   }, [user]);
 
-  const pets = [
-    {
-      id: 1,
-      name: "Max",
-      breed: "Golden Retriever",
-      age: "3 years",
-      gender: "Male",
-      owner: "Sarah Johnson",
-      location: "New York, NY",
-      contact: "+1 (555) 123-4567",
-      compatibility: "95%",
-      image:
-        "https://images.unsplash.com/photo-1552053831-71594a27632d?q=80&w=2062",
-    },
-    {
-      id: 2,
-      name: "Luna",
-      breed: "French Bulldog",
-      age: "2 years",
-      gender: "Female",
-      owner: "Michael Chen",
-      location: "Los Angeles, CA",
-      contact: "+1 (555) 987-6543",
-      compatibility: "88%",
-      image:
-        "https://images.unsplash.com/photo-1560807707-8cc77767d783?q=80&w=1935",
-    },
-    {
-      id: 3,
-      name: "Bella",
-      breed: "Siamese Cat",
-      age: "4 years",
-      gender: "Female",
-      owner: "Emily Rodriguez",
-      location: "Miami, FL",
-      contact: "+1 (555) 456-7890",
-      compatibility: "92%",
-      image:
-        "https://images.unsplash.com/photo-1514888286974-6d03bde4ba14?q=80&w=2070",
-    },
-    {
-      id: 4,
-      name: "Rocky",
-      breed: "German Shepherd",
-      age: "5 years",
-      gender: "Male",
-      owner: "David Wilson",
-      location: "Chicago, IL",
-      contact: "+1 (555) 789-0123",
-      compatibility: "85%",
-      image:
-        "https://images.unsplash.com/photo-1568572933382-74d440642117?q=80&w=1935",
-    },
-  ];
+ const openWhatsApp = (phone: string, username: string) => {
+  const message = `Hello, I'm ${username}.\nI also have a pet.\nI would like to discuss about our pets.`;
+  const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
 
-  
-
+  Linking.canOpenURL(url)
+    .then((supported) => {
+      if (!supported) {
+        Alert.alert("WhatsApp not installed");
+      } else {
+        return Linking.openURL(url);
+      }
+    })
+    .catch((err) => console.error("An error occurred", err));
+};
   return (
     <SafeAreaProvider>
       <View style={{ flex: 1, backgroundColor: "#000000" }}>
@@ -330,7 +296,7 @@ const Home = () => {
                       fontWeight: "bold",
                     }}
                   >
-                    🏆 Top Matches
+                    🏆Matching Alerts
                   </Text>
                   <TouchableOpacity activeOpacity={0.7}>
                     <Text style={{ color: "#FFD700", fontWeight: "600" }}>
@@ -344,11 +310,11 @@ const Home = () => {
                   showsHorizontalScrollIndicator={false}
                   style={{ marginBottom: 32 }}
                 >
-                  {pets.map((pet) => (
+                  {matchAlerts.map((alert) => (
                     <TopMatchCard
-                      key={pet.id}
-                      pet={pet}
-                      onPressView={() => console.log("View", pet.name)}
+                      key={alert.id}
+                      pet={alert}
+                      onPressView={() => openWhatsApp(alert.whatsAppNum, userData?.username ?? "User")}
                     />
                   ))}
                 </ScrollView>
